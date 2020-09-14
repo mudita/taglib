@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 project(taglib)
 
+# set this policy to be able to build the libtag without changing cmake files
+cmake_policy( SET CMP0048 NEW )
+# allow the source code of libtag to build without fixing warnings
+add_compile_options( -Wno-deprecated-copy -Wno-implicit-fallthrough -Wno-delete-non-virtual-dtor -Wno-deprecated-declarations )
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 if(DEFINED ENABLE_STATIC)
@@ -34,7 +39,7 @@ endif()
 option(VISIBILITY_HIDDEN "Build with -fvisibility=hidden" OFF)
 option(BUILD_TESTS "Build the test suite" OFF)
 option(BUILD_EXAMPLES "Build the examples" OFF)
-option(BUILD_BINDINGS "Build the bindings" ON)
+option(BUILD_BINDINGS "Build the bindings" OFF)
 
 option(NO_ITUNES_HACKS "Disable workarounds for iTunes bugs" OFF)
 

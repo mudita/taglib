@@ -94,33 +94,28 @@ namespace
     operator FileName () const { return c_str(); }
   };
 
-  typedef FILE* FileHandle;
+  typedef vfs::FILE *FileHandle;
 
   const FileHandle InvalidFileHandle = 0;
 
   FileHandle openFile(const FileName &path, bool readOnly)
   {
-    return fopen(path, readOnly ? "rb" : "rb+");
-  }
-
-  FileHandle openFile(const int fileDescriptor, bool readOnly)
-  {
-    return fdopen(fileDescriptor, readOnly ? "rb" : "rb+");
+    return vfs.fopen(path, readOnly ? "rb" : "rb+");
   }
 
   void closeFile(FileHandle file)
   {
-    fclose(file);
+    vfs.fclose(file);
   }
 
   size_t readFile(FileHandle file, ByteVector &buffer)
   {
-    return fread(buffer.data(), sizeof(char), buffer.size(), file);
+    return vfs.fread(buffer.data(), sizeof(char), buffer.size(), file);
   }
 
   size_t writeFile(FileHandle file, const ByteVector &buffer)
   {
-    return fwrite(buffer.data(), sizeof(char), buffer.size(), file);
+    return vfs.fwrite(buffer.data(), sizeof(char), buffer.size(), file);
   }
 
 #endif  // _WIN32
@@ -129,16 +124,18 @@ namespace
 class FileStream::FileStreamPrivate
 {
 public:
-  FileStreamPrivate(const FileName &fileName)
+  FileStreamPrivate(const FileName &fileName, bool own = true)
     : file(InvalidFileHandle)
     , name(fileName)
     , readOnly(true)
+        , ownResource(own)
   {
   }
 
   FileHandle file;
   FileNameHandle name;
   bool readOnly;
+  bool ownResource;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,26 +163,17 @@ FileStream::FileStream(FileName fileName, bool openReadOnly)
 # endif
 }
 
-FileStream::FileStream(int fileDescriptor, bool openReadOnly)
-  : d(new FileStreamPrivate(""))
+FileStream::FileStream(vfs::FILE *fd)
+  : d(new FileStreamPrivate("", false))
 {
-  // First try with read / write mode, if that fails, fall back to read only.
 
-  if(!openReadOnly)
-    d->file = openFile(fileDescriptor, false);
-
-  if(d->file != InvalidFileHandle)
-    d->readOnly = false;
-  else
-    d->file = openFile(fileDescriptor, true);
-
-  if(d->file == InvalidFileHandle)
-    debug("Could not open file using file descriptor");
+    d->readOnly = true;
+    d->file = fd;
 }
 
 FileStream::~FileStream()
 {
-  if(isOpen())
+  if(isOpen() && d->ownResource)
     closeFile(d->file);
 
   delete d;
@@ -399,7 +387,7 @@ void FileStream::seek(long offset, Position p)
     return;
   }
 
-  fseek(d->file, offset, whence);
+  vfs.fseek(d->file, offset, whence);
 
 #endif
 }
@@ -412,7 +400,7 @@ void FileStream::clear()
 
 #else
 
-  clearerr(d->file);
+  //clearerr(d->file);
 
 #endif
 }
@@ -435,7 +423,7 @@ long FileStream::tell() const
 
 #else
 
-  return ftell(d->file);
+  return vfs.ftell(d->file);
 
 #endif
 }
@@ -492,11 +480,11 @@ void FileStream::truncate(long length)
   seek(currentPos);
 
 #else
-
-  fflush(d->file);
-  const int error = ftruncate(fileno(d->file), length);
-  if(error != 0)
-    debug("FileStream::truncate() -- Coundn't truncate the file.");
+  // this option will not be used
+  // fflush(d->file);
+  // const int error = ftruncate(fileno(d->file), length);
+  // if(error != 0)
+  //  debug("FileStream::truncate() -- Coundn't truncate the file.");
 
 #endif
 }

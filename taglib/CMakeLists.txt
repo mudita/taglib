@@ -338,6 +338,8 @@ set(tag_LIB_SRCS
 
 add_library(tag ${tag_LIB_SRCS} ${tag_HDRS})
 
+target_link_libraries(tag module-vfs)
+
 if(HAVE_ZLIB AND NOT HAVE_ZLIB_SOURCE)
   target_link_libraries(tag ${ZLIB_LIBRARIES})
 endif()

@@ -31,6 +31,8 @@
 #include "tbytevector.h"
 #include "tiostream.h"
 
+#include "vfs.hpp"
+
 namespace TagLib {
 
   class String;
@@ -57,7 +59,7 @@ namespace TagLib {
     /*!
      * Construct a File object and opens the \a file using file descriptor.
      */
-    FileStream(int fileDescriptor, bool openReadOnly = false);
+    FileStream(vfs::FILE *fd);
 
     /*!
      * Destroys this FileStream instance.
