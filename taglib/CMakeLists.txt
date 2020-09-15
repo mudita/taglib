@@ -1,3 +1,5 @@
+include (thirdparty)
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/toolkit
@@ -335,6 +337,8 @@ set(tag_LIB_SRCS
   audioproperties.cpp
   tagutils.cpp
 )
+
+third_party_source_optimization(${tag_LIB_SRCS})
 
 add_library(tag ${tag_LIB_SRCS} ${tag_HDRS})
 
