@@ -480,11 +480,12 @@ void FileStream::truncate(long length)
   seek(currentPos);
 
 #else
-  // this option will not be used
+  // currently vfs do does not have truncate api
+  // since we open for readonly in our case this can be commented out
   // fflush(d->file);
   // const int error = ftruncate(fileno(d->file), length);
   // if(error != 0)
-  //  debug("FileStream::truncate() -- Coundn't truncate the file.");
+  debug("FileStream::truncate() -- Coundn't truncate the file.");
 
 #endif
 }
