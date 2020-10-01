@@ -27,6 +27,8 @@
 #include "tstring.h"
 #include "tdebug.h"
 
+#include <vfs.hpp>
+
 #ifdef _WIN32
 # include <windows.h>
 #else
