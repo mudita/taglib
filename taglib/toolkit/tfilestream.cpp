@@ -96,28 +96,28 @@ namespace
     operator FileName () const { return c_str(); }
   };
 
-  typedef vfs::FILE *FileHandle;
+  typedef std::FILE *FileHandle;
 
   const FileHandle InvalidFileHandle = 0;
 
   FileHandle openFile(const FileName &path, bool readOnly)
   {
-    return vfs.fopen(path, readOnly ? "rb" : "rb+");
+    return std::fopen(path, readOnly ? "r" : "r+");
   }
 
   void closeFile(FileHandle file)
   {
-    vfs.fclose(file);
+    std::fclose(file);
   }
 
   size_t readFile(FileHandle file, ByteVector &buffer)
   {
-    return vfs.fread(buffer.data(), sizeof(char), buffer.size(), file);
+    return std::fread(buffer.data(), sizeof(char), buffer.size(), file);
   }
 
   size_t writeFile(FileHandle file, const ByteVector &buffer)
   {
-    return vfs.fwrite(buffer.data(), sizeof(char), buffer.size(), file);
+    return std::fwrite(buffer.data(), sizeof(char), buffer.size(), file);
   }
 
 #endif  // _WIN32
@@ -165,7 +165,7 @@ FileStream::FileStream(FileName fileName, bool openReadOnly)
 # endif
 }
 
-FileStream::FileStream(vfs::FILE *fd)
+FileStream::FileStream(std::FILE *fd)
   : d(new FileStreamPrivate("", false))
 {
 
@@ -389,7 +389,7 @@ void FileStream::seek(long offset, Position p)
     return;
   }
 
-  vfs.fseek(d->file, offset, whence);
+  std::fseek(d->file, offset, whence);
 
 #endif
 }
@@ -425,7 +425,7 @@ long FileStream::tell() const
 
 #else
 
-  return vfs.ftell(d->file);
+  return std::ftell(d->file);
 
 #endif
 }

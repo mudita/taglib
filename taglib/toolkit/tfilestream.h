@@ -59,7 +59,7 @@ namespace TagLib {
     /*!
      * Construct a File object and opens the \a file using file descriptor.
      */
-    FileStream(vfs::FILE *fd);
+    FileStream(std::FILE *fd);
 
     /*!
      * Destroys this FileStream instance.
