@@ -31,7 +31,6 @@
 #include "tbytevector.h"
 #include "tiostream.h"
 
-#include "vfs.hpp"
 
 namespace TagLib {
 
