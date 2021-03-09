@@ -145,6 +145,11 @@ set(tag_HDRS
   xm/xmproperties.h
 )
 
+set(ogg_SRCS
+  ogg/xiphcomment.cpp
+)
+
+
 set(mpeg_SRCS
   mpeg/mpegfile.cpp
   mpeg/mpegproperties.cpp
@@ -187,42 +192,12 @@ set(frames_SRCS
   mpeg/id3v2/frames/podcastframe.cpp
 )
 
-set(ogg_SRCS
-  ogg/oggfile.cpp
-  ogg/oggpage.cpp
-  ogg/oggpageheader.cpp
-  ogg/xiphcomment.cpp
-)
-
-set(vorbis_SRCS
-  ogg/vorbis/vorbisfile.cpp
-  ogg/vorbis/vorbisproperties.cpp
-)
-
 set(flacs_SRCS
   flac/flacfile.cpp
   flac/flacpicture.cpp
   flac/flacproperties.cpp
   flac/flacmetadatablock.cpp
   flac/flacunknownmetadatablock.cpp
-)
-
-set(oggflacs_SRCS
-  ogg/flac/oggflacfile.cpp
-)
-
-set(mpc_SRCS
-  mpc/mpcfile.cpp
-  mpc/mpcproperties.cpp
-)
-
-set(mp4_SRCS
-  mp4/mp4file.cpp
-  mp4/mp4atom.cpp
-  mp4/mp4tag.cpp
-  mp4/mp4item.cpp
-  mp4/mp4properties.cpp
-  mp4/mp4coverart.cpp
 )
 
 set(ape_SRCS
@@ -233,69 +208,14 @@ set(ape_SRCS
   ape/apeproperties.cpp
 )
 
-set(wavpack_SRCS
-  wavpack/wavpackfile.cpp
-  wavpack/wavpackproperties.cpp
-)
-
-set(speex_SRCS
-  ogg/speex/speexfile.cpp
-  ogg/speex/speexproperties.cpp
-)
-
-set(opus_SRCS
-  ogg/opus/opusfile.cpp
-  ogg/opus/opusproperties.cpp
-)
-
-set(trueaudio_SRCS
-  trueaudio/trueaudiofile.cpp
-  trueaudio/trueaudioproperties.cpp
-)
-
-set(asf_SRCS
-  asf/asftag.cpp
-  asf/asffile.cpp
-  asf/asfproperties.cpp
-  asf/asfattribute.cpp
-  asf/asfpicture.cpp
-)
-
 set(riff_SRCS
   riff/rifffile.cpp
-)
-
-set(aiff_SRCS
-  riff/aiff/aifffile.cpp
-  riff/aiff/aiffproperties.cpp
 )
 
 set(wav_SRCS
   riff/wav/wavfile.cpp
   riff/wav/wavproperties.cpp
   riff/wav/infotag.cpp
-)
-
-set(mod_SRCS
-  mod/modfilebase.cpp
-  mod/modfile.cpp
-  mod/modtag.cpp
-  mod/modproperties.cpp
-)
-
-set(s3m_SRCS
-  s3m/s3mfile.cpp
-  s3m/s3mproperties.cpp
-)
-
-set(it_SRCS
-  it/itfile.cpp
-  it/itproperties.cpp
-)
-
-set(xm_SRCS
-  xm/xmfile.cpp
-  xm/xmproperties.cpp
 )
 
 set(toolkit_SRCS
