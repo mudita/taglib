@@ -171,3 +171,11 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in" "${CMAKE_C
 if(NOT TARGET uninstall)
   add_custom_target(uninstall COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
+
+set( TAGLIB_INCLUDE_DIRS
+	 "${CMAKE_CURRENT_SOURCE_DIR}/taglib/toolkit"
+	 "${CMAKE_CURRENT_SOURCE_DIR}/taglib"
+	 "${CMAKE_CURRENT_BINARY_DIR}/"
+   CACHE PATH "taglib header paths"
+	 #PARENT_SCOPE
+)
