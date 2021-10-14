@@ -328,7 +328,7 @@ void FileRef::parse(FileName fileName, bool readAudioProperties,
 
   // Try to resolve file types based on the file extension.
 
-  d->stream = new FileStream(fileName);
+  d->stream = new FileStream(fileName, true);
   d->file = detectByExtension(d->stream, readAudioProperties, audioPropertiesStyle);
   if(d->file)
     return;
