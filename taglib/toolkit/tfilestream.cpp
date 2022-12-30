@@ -495,10 +495,10 @@ void FileStream::truncate(long length)
   seek(currentPos);
 
 #else
-
-  fflush(d->file);
-  const int error = ftruncate(fileno(d->file), length);
-  if(error != 0)
+  // since we open for readonly in our case this can be commented out
+//  fflush(d->file);
+//  const int error = ftruncate(fileno(d->file), length);
+//  if(error != 0)
     debug("FileStream::truncate() -- Couldn't truncate the file.");
 
 #endif

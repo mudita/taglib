@@ -224,6 +224,12 @@ void Header::parse(const ByteVector &data)
   d->majorVersion = data[3];   // (structure 3.1 "major version")
   d->revisionNumber = data[4]; // (structure 3.1 "revision number")
 
+  // sanity check for version
+  if(d->majorVersion > 4){
+    d->tagSize = 0;
+    debug("TagLib::ID3v2::Header::parse() - Decoded version is higher than 2.4.0 - probably damaged tag header.");
+    return;
+  }
   // Read the flags, the first four bits of the sixth byte.
   std::bitset<8> flags(data[5]);
 

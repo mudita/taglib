@@ -178,4 +178,9 @@ if(NOT TARGET uninstall)
   add_custom_target(uninstall COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake")
 endif()
 
+target_include_directories( tag PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/taglib/toolkit" )
+target_include_directories( tag PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/taglib" )
+target_include_directories( tag PUBLIC "${CMAKE_CURRENT_BINARY_DIR}" )
+target_compile_options( tag PRIVATE "-Wno-sign-compare" "-Wno-implicit-fallthrough" "-Wno-delete-non-virtual-dtor" )
+
 feature_summary(WHAT ALL   FATAL_ON_MISSING_REQUIRED_PACKAGES)
