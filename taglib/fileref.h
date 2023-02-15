@@ -284,12 +284,29 @@ namespace TagLib {
                         bool readAudioProperties = true,
                         AudioProperties::ReadStyle audioPropertiesStyle = AudioProperties::Average);
 
+  protected:
+    explicit FileRef(FileName fileName,
+                     bool readAudioProperties,
+                     AudioProperties::ReadStyle audioPropertiesStyle,
+                     bool readOnly);
+
   private:
-    void parse(FileName fileName, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle);
+    void parse(FileName fileName, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle, bool readOnly);
     void parse(IOStream *stream, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle);
 
     class FileRefPrivate;
     FileRefPrivate *d;
+  };
+
+  /*!
+   * Simple wrapper over FileRef class that internally opens file in read-only mode. It allows for only reading
+   * and parsing audio tags but not modifying/updating.
+   */
+  class ConstFileRef : public FileRef{
+  public:
+    explicit ConstFileRef(FileName fileName,
+                             bool readAudioProperties = true,
+                             AudioProperties::ReadStyle audioPropertiesStyle = AudioProperties::Average);
   };
 
 } // namespace TagLib

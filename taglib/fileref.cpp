@@ -321,9 +321,16 @@ FileRef::FileRef() :
 
 FileRef::FileRef(FileName fileName, bool readAudioProperties,
                  AudioProperties::ReadStyle audioPropertiesStyle) :
-  d(new FileRefPrivate())
+      d(new FileRefPrivate())
 {
-  parse(fileName, readAudioProperties, audioPropertiesStyle);
+  parse(fileName, readAudioProperties, audioPropertiesStyle, false);
+}
+
+FileRef::FileRef(FileName fileName, bool readAudioProperties,
+                 AudioProperties::ReadStyle audioPropertiesStyle, bool readOnly) :
+      d(new FileRefPrivate())
+{
+  parse(fileName, readAudioProperties, audioPropertiesStyle, readOnly);
 }
 
 FileRef::FileRef(IOStream* stream, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle) :
@@ -466,7 +473,7 @@ File *FileRef::create(FileName fileName, bool readAudioProperties,
 ////////////////////////////////////////////////////////////////////////////////
 
 void FileRef::parse(FileName fileName, bool readAudioProperties,
-                    AudioProperties::ReadStyle audioPropertiesStyle)
+                    AudioProperties::ReadStyle audioPropertiesStyle, bool readOnly)
 {
   // Try user-defined resolvers.
 
@@ -476,7 +483,7 @@ void FileRef::parse(FileName fileName, bool readAudioProperties,
 
   // Try to resolve file types based on the file extension.
 
-  d->stream = new FileStream(fileName);
+  d->stream = new FileStream(fileName, readOnly);
   d->file = detectByExtension(d->stream, readAudioProperties, audioPropertiesStyle);
   if(d->file)
     return;
@@ -518,3 +525,9 @@ void FileRef::parse(IOStream *stream, bool readAudioProperties,
 
   d->file = detectByContent(stream, readAudioProperties, audioPropertiesStyle);
 }
+
+ConstFileRef::ConstFileRef(FileName fileName,
+                                 bool readAudioProperties,
+                                 AudioProperties::ReadStyle audioPropertiesStyle)
+    : FileRef(fileName, readAudioProperties, audioPropertiesStyle,true)
+{}
