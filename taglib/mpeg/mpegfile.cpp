@@ -150,12 +150,13 @@ MPEG::File::File(FileName file, ID3v2::FrameFactory *frameFactory,
 }
 
 MPEG::File::File(IOStream *stream, ID3v2::FrameFactory *frameFactory,
-                 bool readProperties, Properties::ReadStyle) :
+                 bool readProperties, Properties::ReadStyle,
+                 Configuration configuration) :
   TagLib::File(stream),
   d(new FilePrivate(frameFactory))
 {
   if(isOpen())
-    read(readProperties);
+    read(readProperties, configuration);
 }
 
 MPEG::File::~File()
@@ -498,14 +499,14 @@ bool MPEG::File::hasAPETag() const
 // private members
 ////////////////////////////////////////////////////////////////////////////////
 
-void MPEG::File::read(bool readProperties)
+void MPEG::File::read(bool readProperties, Configuration configuration)
 {
   // Look for an ID3v2 tag
 
   d->ID3v2Location = findID3v2();
 
   if(d->ID3v2Location >= 0) {
-    d->tag.set(ID3v2Index, new ID3v2::Tag(this, d->ID3v2Location, d->ID3v2FrameFactory));
+    d->tag.set(ID3v2Index, new ID3v2::Tag(this, d->ID3v2Location, d->ID3v2FrameFactory, configuration));
     d->ID3v2OriginalSize = ID3v2Tag()->header()->completeTagSize();
   }
 

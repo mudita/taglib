@@ -125,14 +125,14 @@ ID3v2::Tag::Tag() :
   d->factory = FrameFactory::instance();
 }
 
-ID3v2::Tag::Tag(File *file, long tagOffset, const FrameFactory *factory) :
+ID3v2::Tag::Tag(File *file, long tagOffset, const FrameFactory *factory, Configuration configuration) :
   d(new TagPrivate())
 {
   d->factory = factory;
   d->file = file;
   d->tagOffset = tagOffset;
 
-  read();
+  read(configuration);
 }
 
 ID3v2::Tag::~Tag()
@@ -724,12 +724,12 @@ void ID3v2::Tag::setLatin1StringHandler(const Latin1StringHandler *handler)
 // protected members
 ////////////////////////////////////////////////////////////////////////////////
 
-void ID3v2::Tag::read()
+void ID3v2::Tag::read(Configuration configuration)
 {
   if(!d->file)
     return;
 
-  if(!d->file->isOpen())
+  if (!d->file->isOpen())
     return;
 
   d->file->seek(d->tagOffset);
@@ -738,8 +738,16 @@ void ID3v2::Tag::read()
   // If the tag size is 0, then this is an invalid tag (tags must contain at
   // least one frame)
 
-  if(d->header.tagSize() != 0)
+  bool isParsable = d->header.tagSize() != 0;
+  if (configuration.limitMemoryUsage) {
+    // Skip reading too large header to ensure the system works correctly and is stable.
+    // On Harmony reading too large a block from the header caused system crashes.
+    // Crashes occurred while copying files on the device.
+    isParsable = isParsable && d->header.tagSize() <= configuration.maxTagSize;
+  }
+  if (isParsable) {
     parse(d->file->readBlock(d->header.tagSize()));
+  }
 
   // Look for duplicate ID3v2 tags and treat them as an extra blank of this one.
   // It leads to overwriting them with zero when saving the tag.

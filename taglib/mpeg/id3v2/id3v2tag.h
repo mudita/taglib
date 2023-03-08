@@ -36,6 +36,8 @@
 #include "id3v2.h"
 #include "id3v2framefactory.h"
 
+#include "configuration.h"
+
 namespace TagLib {
 
   class File;
@@ -147,7 +149,8 @@ namespace TagLib {
        * \see FrameFactory
        */
       Tag(File *file, long tagOffset,
-          const FrameFactory *factory = FrameFactory::instance());
+          const FrameFactory *factory = FrameFactory::instance(),
+          Configuration configuration = Configuration());
 
       /*!
        * Destroys this Tag instance.
@@ -378,7 +381,7 @@ namespace TagLib {
        * the Header, the body of the tag  (which contains the ExtendedHeader and
        * frames) and Footer.
        */
-      void read();
+      void read(Configuration configuration);
 
       /*!
        * This is called by read to parse the body of the tag.  It determines if an

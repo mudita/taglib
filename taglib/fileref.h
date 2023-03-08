@@ -31,6 +31,7 @@
 
 #include "taglib_export.h"
 #include "audioproperties.h"
+#include "configuration.h"
 
 namespace TagLib {
 
@@ -288,11 +289,11 @@ namespace TagLib {
     explicit FileRef(FileName fileName,
                      bool readAudioProperties,
                      AudioProperties::ReadStyle audioPropertiesStyle,
-                     bool readOnly);
+                     Configuration configuration);
 
   private:
-    void parse(FileName fileName, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle, bool readOnly);
-    void parse(IOStream *stream, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle);
+    void parse(FileName fileName, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle, Configuration configuration = Configuration());
+    void parse(IOStream *stream, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle, Configuration configuration = Configuration());
 
     class FileRefPrivate;
     FileRefPrivate *d;
@@ -305,8 +306,16 @@ namespace TagLib {
   class ConstFileRef : public FileRef{
   public:
     explicit ConstFileRef(FileName fileName,
-                             bool readAudioProperties = true,
-                             AudioProperties::ReadStyle audioPropertiesStyle = AudioProperties::Average);
+                          bool readAudioProperties = true,
+                          AudioProperties::ReadStyle audioPropertiesStyle = AudioProperties::Average);
+  };
+
+  class ConstMemoryConstrainedFileRef : public FileRef{
+  public:
+    explicit ConstMemoryConstrainedFileRef(FileName fileName,
+                                           std::size_t maxTagSize,
+                                           bool readAudioProperties = true,
+                                           AudioProperties::ReadStyle audioPropertiesStyle = AudioProperties::Average);
   };
 
 } // namespace TagLib
