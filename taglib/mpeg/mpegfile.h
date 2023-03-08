@@ -34,6 +34,8 @@
 
 #include "id3v2.h"
 
+#include "configuration.h"
+
 namespace TagLib {
 
   namespace ID3v2 { class Tag; class FrameFactory; }
@@ -112,7 +114,8 @@ namespace TagLib {
        */
       File(IOStream *stream, ID3v2::FrameFactory *frameFactory,
            bool readProperties = true,
-           Properties::ReadStyle propertiesStyle = Properties::Average);
+           Properties::ReadStyle propertiesStyle = Properties::Average,
+           Configuration configuration = Configuration());
 
       /*!
        * Destroys this instance of the File.
@@ -375,7 +378,7 @@ namespace TagLib {
       File(const File &);
       File &operator=(const File &);
 
-      void read(bool readProperties);
+      void read(bool readProperties, Configuration configuration = Configuration());
       long findID3v2();
 
       class FilePrivate;

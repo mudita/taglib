@@ -129,12 +129,13 @@ FLAC::File::File(FileName file, ID3v2::FrameFactory *frameFactory,
 }
 
 FLAC::File::File(IOStream *stream, ID3v2::FrameFactory *frameFactory,
-                 bool readProperties, Properties::ReadStyle) :
+                 bool readProperties, Properties::ReadStyle,
+                 Configuration configuration) :
   TagLib::File(stream),
   d(new FilePrivate(frameFactory))
 {
   if(isOpen())
-    read(readProperties);
+    read(readProperties, configuration);
 }
 
 FLAC::File::~File()
@@ -420,14 +421,14 @@ bool FLAC::File::hasID3v2Tag() const
 // private members
 ////////////////////////////////////////////////////////////////////////////////
 
-void FLAC::File::read(bool readProperties)
+void FLAC::File::read(bool readProperties, Configuration configuration)
 {
   // Look for an ID3v2 tag
 
   d->ID3v2Location = Utils::findID3v2(this);
 
   if(d->ID3v2Location >= 0) {
-    d->tag.set(FlacID3v2Index, new ID3v2::Tag(this, d->ID3v2Location, d->ID3v2FrameFactory));
+    d->tag.set(FlacID3v2Index, new ID3v2::Tag(this, d->ID3v2Location, d->ID3v2FrameFactory, configuration));
     d->ID3v2OriginalSize = ID3v2Tag()->header()->completeTagSize();
   }
 
@@ -440,7 +441,7 @@ void FLAC::File::read(bool readProperties)
 
   // Look for FLAC metadata, including vorbis comments
 
-  scan();
+  scan(configuration);
 
   if(!isValid())
     return;
@@ -467,7 +468,7 @@ void FLAC::File::read(bool readProperties)
   }
 }
 
-void FLAC::File::scan()
+void FLAC::File::scan(Configuration configuration)
 {
   // Scan the metadata pages
 
@@ -518,6 +519,22 @@ void FLAC::File::scan()
     const char blockType = header[0] & ~LastBlockFlag;
     const bool isLastBlock = (header[0] & LastBlockFlag) != 0;
     const unsigned int blockLength = header.toUInt(1U, 3U);
+
+    if (configuration.limitMemoryUsage) {
+      // Skip reading too large header to ensure the system works correctly and is stable.
+      // On Harmony reading too large a block from the header caused system crashes.
+      // Crashes occurred while copying files on the device.
+      if (blockType >= MetadataBlock::Picture) {
+
+        // ensuring everything is handled as it would be at the end of loop
+        nextBlockOffset += blockLength + 4;
+        if (isLastBlock) {
+          break;
+        }
+
+        continue;
+      }
+    }
 
     // First block should be the stream_info metadata
 

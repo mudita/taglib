@@ -103,7 +103,8 @@ namespace
   // Detect the file type based on the file extension.
 
   File* detectByExtension(IOStream *stream, bool readAudioProperties,
-                          AudioProperties::ReadStyle audioPropertiesStyle)
+                          AudioProperties::ReadStyle audioPropertiesStyle,
+                          Configuration configuration)
   {
 #ifdef _WIN32
     const String s = stream->name().toString();
@@ -128,11 +129,11 @@ namespace
     File *file = 0;
 
     if(ext == "MP3")
-      file = new MPEG::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle);
+      file = new MPEG::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle, configuration);
     else if(ext == "OGG")
       file = new Ogg::Vorbis::File(stream, readAudioProperties, audioPropertiesStyle);
     else if(ext == "FLAC")
-      file = new FLAC::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle);
+      file = new FLAC::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle, configuration);
     else if(ext == "MPC")
       file = new MPC::File(stream, readAudioProperties, audioPropertiesStyle);
     else if(ext == "WV")
@@ -177,18 +178,19 @@ namespace
   // Detect the file type based on the actual content of the stream.
 
   File *detectByContent(IOStream *stream, bool readAudioProperties,
-                        AudioProperties::ReadStyle audioPropertiesStyle)
+                        AudioProperties::ReadStyle audioPropertiesStyle,
+                        Configuration configuration)
   {
     File *file = 0;
 
     if(MPEG::File::isSupported(stream))
-      file = new MPEG::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle);
+      file = new MPEG::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle, configuration);
     else if(Ogg::Vorbis::File::isSupported(stream))
       file = new Ogg::Vorbis::File(stream, readAudioProperties, audioPropertiesStyle);
     else if(Ogg::FLAC::File::isSupported(stream))
       file = new Ogg::FLAC::File(stream, readAudioProperties, audioPropertiesStyle);
     else if(FLAC::File::isSupported(stream))
-      file = new FLAC::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle);
+      file = new FLAC::File(stream, ID3v2::FrameFactory::instance(), readAudioProperties, audioPropertiesStyle, configuration);
     else if(MPC::File::isSupported(stream))
       file = new MPC::File(stream, readAudioProperties, audioPropertiesStyle);
     else if(WavPack::File::isSupported(stream))
@@ -323,14 +325,15 @@ FileRef::FileRef(FileName fileName, bool readAudioProperties,
                  AudioProperties::ReadStyle audioPropertiesStyle) :
       d(new FileRefPrivate())
 {
-  parse(fileName, readAudioProperties, audioPropertiesStyle, false);
+  parse(fileName, readAudioProperties, audioPropertiesStyle);
 }
 
 FileRef::FileRef(FileName fileName, bool readAudioProperties,
-                 AudioProperties::ReadStyle audioPropertiesStyle, bool readOnly) :
+                 AudioProperties::ReadStyle audioPropertiesStyle,
+                 Configuration configuration) :
       d(new FileRefPrivate())
 {
-  parse(fileName, readAudioProperties, audioPropertiesStyle, readOnly);
+  parse(fileName, readAudioProperties, audioPropertiesStyle, configuration);
 }
 
 FileRef::FileRef(IOStream* stream, bool readAudioProperties, AudioProperties::ReadStyle audioPropertiesStyle) :
@@ -473,7 +476,7 @@ File *FileRef::create(FileName fileName, bool readAudioProperties,
 ////////////////////////////////////////////////////////////////////////////////
 
 void FileRef::parse(FileName fileName, bool readAudioProperties,
-                    AudioProperties::ReadStyle audioPropertiesStyle, bool readOnly)
+                    AudioProperties::ReadStyle audioPropertiesStyle, Configuration configuration)
 {
   // Try user-defined resolvers.
 
@@ -483,14 +486,14 @@ void FileRef::parse(FileName fileName, bool readAudioProperties,
 
   // Try to resolve file types based on the file extension.
 
-  d->stream = new FileStream(fileName, readOnly);
-  d->file = detectByExtension(d->stream, readAudioProperties, audioPropertiesStyle);
+  d->stream = new FileStream(fileName, configuration.readOnly);
+  d->file = detectByExtension(d->stream, readAudioProperties, audioPropertiesStyle, configuration);
   if(d->file)
     return;
 
   // At last, try to resolve file types based on the actual content.
 
-  d->file = detectByContent(d->stream, readAudioProperties, audioPropertiesStyle);
+  d->file = detectByContent(d->stream, readAudioProperties, audioPropertiesStyle, configuration);
   if(d->file)
     return;
 
@@ -501,7 +504,8 @@ void FileRef::parse(FileName fileName, bool readAudioProperties,
 }
 
 void FileRef::parse(IOStream *stream, bool readAudioProperties,
-                    AudioProperties::ReadStyle audioPropertiesStyle)
+                    AudioProperties::ReadStyle audioPropertiesStyle,
+                    Configuration configuration)
 {
   // Try user-defined stream resolvers.
 
@@ -517,17 +521,25 @@ void FileRef::parse(IOStream *stream, bool readAudioProperties,
 
   // Try to resolve file types based on the file extension.
 
-  d->file = detectByExtension(stream, readAudioProperties, audioPropertiesStyle);
+  d->file = detectByExtension(stream, readAudioProperties, audioPropertiesStyle, configuration);
   if(d->file)
     return;
 
   // At last, try to resolve file types based on the actual content of the file.
 
-  d->file = detectByContent(stream, readAudioProperties, audioPropertiesStyle);
+  d->file = detectByContent(stream, readAudioProperties, audioPropertiesStyle, configuration);
 }
 
 ConstFileRef::ConstFileRef(FileName fileName,
-                                 bool readAudioProperties,
-                                 AudioProperties::ReadStyle audioPropertiesStyle)
-    : FileRef(fileName, readAudioProperties, audioPropertiesStyle,true)
+                           bool readAudioProperties,
+                           AudioProperties::ReadStyle audioPropertiesStyle)
+    : FileRef(fileName, readAudioProperties, audioPropertiesStyle, Configuration(true))
 {}
+
+ConstMemoryConstrainedFileRef::ConstMemoryConstrainedFileRef(FileName fileName,
+                                                             std::size_t maxTagSize,
+                                                             bool readAudioProperties,
+                                                             AudioProperties::ReadStyle audioPropertiesStyle)
+    : FileRef(fileName, readAudioProperties, audioPropertiesStyle, Configuration(true, true, maxTagSize))
+{}
+
