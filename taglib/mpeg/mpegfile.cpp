@@ -502,12 +502,11 @@ void MPEG::File::read(bool readProperties)
 {
   // Look for an ID3v2 tag
 
-  d->ID3v2Location = findID3v2();
-
-  if(d->ID3v2Location >= 0) {
-    d->tag.set(ID3v2Index, new ID3v2::Tag(this, d->ID3v2Location, d->ID3v2FrameFactory));
-    d->ID3v2OriginalSize = ID3v2Tag()->header()->completeTagSize();
-  }
+    d->ID3v2Location = findID3v2();
+    if(d->ID3v2Location >= 0) {
+        d->tag.set(ID3v2Index, new ID3v2::Tag(this, d->ID3v2Location, d->ID3v2FrameFactory));
+        d->ID3v2OriginalSize = ID3v2Tag()->header()->completeTagSize();
+    }
 
   // Look for an ID3v1 tag
 

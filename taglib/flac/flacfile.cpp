@@ -515,9 +515,25 @@ void FLAC::File::scan()
     //    ..
     // <24> Length of metadata to follow
 
-    const char blockType = header[0] & ~LastBlockFlag;
-    const bool isLastBlock = (header[0] & LastBlockFlag) != 0;
+    const char blockType           = header[0] & ~LastBlockFlag;
+    const bool isLastBlock         = (header[0] & LastBlockFlag) != 0;
     const unsigned int blockLength = header.toUInt(1U, 3U);
+
+    // Skip reading too large header to ensure the system works correctly and is stable.
+    // On Harmony reading too large a block from the header caused system crashes. Crashes occurred while copying files
+    // via MC on the device.
+    // On Pure files with large headers were reading slowly, and copied files weren't accessible in
+    // the music player right after the action was finished.
+    if (blockType >= MetadataBlock::Picture) {
+
+      // ensuring everything is handled as it would be at the end of loop
+      nextBlockOffset += blockLength + 4;
+      if (isLastBlock) {
+        break;
+      }
+
+      continue;
+    }
 
     // First block should be the stream_info metadata
 

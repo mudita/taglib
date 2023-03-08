@@ -49,33 +49,28 @@ using namespace ID3v2;
 
 namespace
 {
-  const ID3v2::Latin1StringHandler defaultStringHandler;
-  const ID3v2::Latin1StringHandler *stringHandler = &defaultStringHandler;
+    const ID3v2::Latin1StringHandler defaultStringHandler;
+    const ID3v2::Latin1StringHandler *stringHandler = &defaultStringHandler;
 
-  const long MinPaddingSize = 1024;
-  const long MaxPaddingSize = 1024 * 1024;
+    const long MinPaddingSize        = 1024;
+    const long MaxPaddingSize        = 1024 * 1024;
+    const long MaxReadableBufferSize = 20 * 1024;
 
-  bool contains(const char **a, const ByteVector &v)
-  {
-    for(int i = 0; a[i]; i++)
+    bool contains(const char **a, const ByteVector &v)
     {
-      if(v == a[i])
-        return true;
+        for (int i = 0; a[i]; i++) {
+            if (v == a[i])
+                return true;
+        }
+        return false;
     }
-    return false;
-  }
-}  // namespace
+} // namespace
 
 class ID3v2::Tag::TagPrivate
 {
-public:
-  TagPrivate() :
-    factory(0),
-    file(0),
-    tagOffset(0),
-    extendedHeader(0),
-    footer(0)
-  {
+  public:
+    TagPrivate() : factory(0), file(0), tagOffset(0), extendedHeader(0), footer(0)
+    {
     frameList.setAutoDelete(true);
   }
 
@@ -142,21 +137,22 @@ ID3v2::Tag::~Tag()
 
 String ID3v2::Tag::title() const
 {
-  if(!d->frameListMap["TIT2"].isEmpty())
+  if (!d->frameListMap["TIT2"].isEmpty()) {
     return d->frameListMap["TIT2"].front()->toString();
+  }
   return String();
 }
 
 String ID3v2::Tag::artist() const
 {
-  if(!d->frameListMap["TPE1"].isEmpty())
+  if (!d->frameListMap["TPE1"].isEmpty())
     return d->frameListMap["TPE1"].front()->toString();
   return String();
 }
 
 String ID3v2::Tag::album() const
 {
-  if(!d->frameListMap["TALB"].isEmpty())
+  if (!d->frameListMap["TALB"].isEmpty())
     return d->frameListMap["TALB"].front()->toString();
   return String();
 }
@@ -729,7 +725,7 @@ void ID3v2::Tag::read()
   if(!d->file)
     return;
 
-  if(!d->file->isOpen())
+  if (!d->file->isOpen())
     return;
 
   d->file->seek(d->tagOffset);
@@ -738,8 +734,14 @@ void ID3v2::Tag::read()
   // If the tag size is 0, then this is an invalid tag (tags must contain at
   // least one frame)
 
-  if(d->header.tagSize() != 0)
+  // Skip reading too large header to ensure the system works correctly and is stable.
+  // On Harmony reading too large a block from the header caused system crashes. Crashes occurred while copying files
+  // via MC on the device.
+  // On Pure files with large headers were reading slowly, and copied files weren't accessible in
+  // the music player right after the action was finished.
+  if (d->header.tagSize() != 0 and d->header.tagSize() <= MaxReadableBufferSize) {
     parse(d->file->readBlock(d->header.tagSize()));
+  }
 
   // Look for duplicate ID3v2 tags and treat them as an extra blank of this one.
   // It leads to overwriting them with zero when saving the tag.
